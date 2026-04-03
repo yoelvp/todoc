@@ -11,17 +11,20 @@ static void print_lines(int width) {
 }
 
 static void add_notes(const char *path) {
-    char buffer[200];
+    char *buffer = NULL;
+    size_t buflen = 0;
     FILE *f = fopen(path, "a+");
 
     if (f == NULL) {
         perror("Error adding a note.");
+        fclose(f);
         return;
     }
 
     printf("Enter your note > ");
-    if (!fgets(buffer, sizeof(buffer), stdin)) {
-        perror("fgets");
+    fflush(stdout);
+    if (!getline(&buffer, &buflen, stdin)) {
+        perror("getline");
         fclose(f);
         return;
     }
@@ -140,6 +143,12 @@ int main() {
 
         if (buffer[0] == '\n')
             continue;
+
+        if (buffer[1] != '\n' && buffer[1] != '\0') {
+            printf("Invalid option, please enter only one char.\n");
+            continue;
+        }
+
         option = buffer[0];
 
         switch (option) {
@@ -159,7 +168,7 @@ int main() {
         case 'q':
             break;
         default:
-            printf("Invalid selected option.\n");
+            printf("Invalid option.\n");
             printf("\n");
         }
     } while (option != 'q');
